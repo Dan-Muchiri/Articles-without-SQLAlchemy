@@ -1,5 +1,4 @@
 from __init__ import CONN, CURSOR
-import random
 from restaurant import Restaurant
 from customer import Customer
 from review import Review
