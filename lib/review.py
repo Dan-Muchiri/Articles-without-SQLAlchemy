@@ -1,10 +1,12 @@
-# lib/department.py
+# lib/review.py
+
 from __init__ import CURSOR, CONN
+from customer import Customer
+from restaurant import Restaurant
 
 
 class Review:
     
-    # Dictionary of objects saved to the database.
     all = {}
 
     def __init__(self, restarant_id, customer_id, star_rating, id=None):
@@ -67,7 +69,7 @@ class Review:
             FOREIGN KEY (restaurant_id) REFERENCES restaurants(id),
             FOREIGN KEY (customer_id) REFERENCES customers(id)
             )
-        """  # Closing parenthesis was missing here
+        """  
         CURSOR.execute(sql)
         CONN.commit()
 
@@ -102,4 +104,46 @@ class Review:
         review.save()
         return review
 
+    def customer(self):
+        """Returns the Customer instance associated with this review."""
+        sql = """
+            SELECT * FROM customers
+            WHERE id = ?
+        """
+        CURSOR.execute(sql, (self.customer_id,))
+        result = CURSOR.fetchone()
+
+        if result:
+            customer_id, first_name, last_name = result
+            return Customer(first_name, last_name, customer_id)
+        else:
+            return None
+        
+    def restaurant(self):
+        """Returns the Restaurant instance associated with this review."""
+        sql = """
+            SELECT * FROM restaurants
+            WHERE id = ?
+        """
+        CURSOR.execute(sql, (self.restaurant_id,))
+        result = CURSOR.fetchone()
+
+        if result:
+            restaurant_id, name, price = result
+            return Restaurant(name, price, restaurant_id)
+        else:
+            return None
+        
+    def full_review(self):
+        """Return a string formatted as Review for {restaurant name} by {customer's full name}: {review star rating} stars."""
+
+        from restaurant import Restaurant
+        restaurant = Restaurant.find_by_id(self.restaurant_id)
+
+        from customer import Customer
+        customer = Customer.find_by_id(self.customer_id)
+
+        return f"Review for {restaurant.name} by {customer.full_name()}: {self.star_rating} stars."
+    
+    
    
